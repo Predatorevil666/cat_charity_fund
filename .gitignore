@@ -130,3 +130,9 @@ dmypy.json
 
 # .idea
 .idea
+
+pyproject.toml
+
+# Database files
+fastapi.db
+test.db
