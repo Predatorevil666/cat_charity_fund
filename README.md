@@ -1,5 +1,8 @@
 # Благотворительный фонд поддержки котиков QRKot
 
+## Автор проект
+* [Alexander Batogov](https://github.com/Predatorevil666)
+
 ## Описание
 
 Приложение для Благотворительного фонда поддержки котиков QRKot. Фонд собирает пожертвования на различные целевые проекты: на медицинское обслуживание нуждающихся хвостатых, на обустройство кошачьей колонии в подвале, на корм оставшимся без попечения кошкам — на любые цели, связанные с поддержкой кошачьей популяции.
@@ -21,15 +24,18 @@
 ## Установка и запуск
 
 1. Клонировать репозиторий
+```bash
+   git clone <ссылка на репозиторий>
+   cd cat_charity_fund
 2. Создать и активировать виртуальное окружение:
-```
-python -m venv venv
-source venv/bin/activate  # для Linux/Mac
-venv\Scripts\activate  # для Windows
+```bash
+    python -m venv venv
+    source venv/bin/activate  # для Linux/Mac
+    venv\Scripts\activate  # для Windows
 ```
 3. Установить зависимости:
-```
-pip install -r requirements.txt
+```bash
+    pip install -r requirements.txt
 ```
 4. Создать файл .env в корне проекта со следующими переменными окружения:
 ```
@@ -44,8 +50,8 @@ FIRST_SUPERUSER_PASSWORD=admin
 5. Запустить приложение одним из способов:
 
 ### Способ 1: Автоматический запуск (рекомендуется)
-```
-python app/run.py
+```bash
+    python app/run.py
 ```
 Этот скрипт автоматически:
 - Применит миграции, если база данных не существует
@@ -53,15 +59,18 @@ python app/run.py
 - Запустит приложение с помощью uvicorn
 
 ### Способ 2: Ручной запуск
-```
+
 # Применить миграции
-alembic upgrade head
-
+```bash
+    alembic upgrade head
+```
 # Создать суперпользователя
-python app/create_superuser.py
-
+```bash
+    python app/create_superuser.py
+```
 # Запустить приложение
-uvicorn app.main:app --reload
+```bash
+    uvicorn app.main:app --reload --port(при необходимости смены порта)
 ```
 
 ## API Endpoints

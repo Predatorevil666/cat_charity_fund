@@ -5,6 +5,17 @@ from app.schemas.user import UserCreate, UserRead, UserUpdate
 
 router = APIRouter()
 
+
+@router.post("/auth/jwt/logout", tags=["auth"])
+async def logout():
+    """
+    Эндпоинт для выхода из системы.
+    В случае JWT-аутентификации фактически просто возвращает успешный статус,
+    так как токены хранятся на стороне клиента.
+    """
+    return {}
+
+
 router.include_router(
     fastapi_users.get_auth_router(auth_backend),
     prefix="/auth/jwt",

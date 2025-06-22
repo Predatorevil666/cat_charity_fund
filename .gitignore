@@ -132,7 +132,9 @@ dmypy.json
 .idea
 
 pyproject.toml
+.ruff_cache/
 
 # Database files
 fastapi.db
+fastapi.db.backup
 test.db
