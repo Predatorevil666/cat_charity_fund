@@ -4,7 +4,7 @@
 		"name": "QRKot",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "16131548"
-	},
+	}, 
 	"item": [
 		{
 			"name": "auth",
@@ -6411,7 +6411,7 @@
 	"variable": [
 		{
 			"key": "baseURL",
-			"value": "http://127.0.0.1:8000",
+			"value": "http://127.0.0.1:8003",
 			"type": "string"
 		},
 		{

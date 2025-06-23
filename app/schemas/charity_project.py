@@ -17,18 +17,18 @@ class CharityProjectCreate(CharityProjectBase):
 
 
 class CharityProjectUpdate(CharityProjectBase):
-    @validator('name')
+    @validator("name")
     def name_cannot_be_null(cls, value):
         if value is None:
-            raise ValueError('Имя проекта не может быть пустым!')
+            raise ValueError("Имя проекта не может быть пустым!")
         return value
 
-    @validator('description')
+    @validator("description")
     def description_cannot_be_null(cls, value):
         if value is None:
-            raise ValueError('Описание проекта не может быть пустым!')
+            raise ValueError("Описание проекта не может быть пустым!")
         return value
-    
+
     class Config:
         extra = "forbid"
 
@@ -41,4 +41,4 @@ class CharityProjectDB(CharityProjectCreate):
     close_date: Optional[datetime]
 
     class Config:
-        orm_mode = True 
+        orm_mode = True

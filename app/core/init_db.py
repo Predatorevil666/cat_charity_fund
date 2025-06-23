@@ -1,5 +1,3 @@
-import asyncio
-
 from fastapi_users.exceptions import UserAlreadyExists
 
 from app.core.db import get_async_session
@@ -36,4 +34,4 @@ async def create_user(email: str, password: str, is_superuser: bool = False):
                         print(f"Ошибка при создании пользователя: {e}")
     except Exception as e:
         print(f"Произошла ошибка при создании пользователя: {e}")
-        raise e 
+        raise e

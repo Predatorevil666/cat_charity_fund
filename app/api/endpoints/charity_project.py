@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import List
 
 from fastapi import APIRouter, Depends
@@ -88,4 +89,13 @@ async def partially_update_charity_project(
     charity_project = await update_charity_project(
         charity_project, obj_in, session
     )
+
+    # Проверяем, нужно ли закрыть проект после обновления
+    if charity_project.invested_amount == charity_project.full_amount:
+        charity_project.fully_invested = True
+        charity_project.close_date = datetime.utcnow()
+        session.add(charity_project)
+        await session.commit()
+        await session.refresh(charity_project)
+
     return charity_project

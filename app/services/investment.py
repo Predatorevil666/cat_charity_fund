@@ -29,7 +29,7 @@ async def invest_money(
         return obj_in
 
     obj_in_need = obj_in.full_amount - obj_in.invested_amount
-    
+
     for obj in objects:
         obj_available = obj.full_amount - obj.invested_amount
 
@@ -50,11 +50,11 @@ async def invest_money(
             if obj_in.invested_amount == obj_in.full_amount:
                 obj_in.fully_invested = True
                 obj_in.close_date = datetime.utcnow()
-            
+
             break
 
         session.add(obj)
-        
+
         if obj_in_need <= 0:
             break
 

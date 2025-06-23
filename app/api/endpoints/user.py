@@ -1,19 +1,33 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 
-from app.core.user import auth_backend, fastapi_users
+from app.core.user import (
+    auth_backend,
+    current_superuser,
+    current_user,
+    fastapi_users,
+)
+from app.models.user import User
 from app.schemas.user import UserCreate, UserRead, UserUpdate
 
 router = APIRouter()
 
 
 @router.post("/auth/jwt/logout", tags=["auth"])
-async def logout():
+async def logout(user: User = Depends(current_user)):
     """
     Эндпоинт для выхода из системы.
-    В случае JWT-аутентификации фактически просто возвращает успешный статус,
-    так как токены хранятся на стороне клиента.
+    Требует валидный токен аутентификации.
     """
     return {}
+
+
+# Определяем кастомный эндпоинт для удаления пользователя до подключения роутеров fastapi_users
+@router.delete("/users/{id}", tags=["users"], deprecated=True)
+def delete_user(id: str, user: User = Depends(current_superuser)):
+    """Не используйте удаление, деактивируйте пользователей."""
+    raise HTTPException(
+        status_code=405, detail="Удаление пользователей запрещено!"
+    )
 
 
 router.include_router(
@@ -31,11 +45,3 @@ router.include_router(
     prefix="/users",
     tags=["users"],
 )
-
-
-@router.delete("/users/{id}", tags=["users"], deprecated=True)
-def delete_user(id: str):
-    """Не используйте удаление, деактивируйте пользователей."""
-    raise HTTPException(
-        status_code=405, detail="Удаление пользователей запрещено!"
-    )

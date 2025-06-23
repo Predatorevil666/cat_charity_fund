@@ -70,8 +70,8 @@ def run_app():
                 "--host",
                 "0.0.0.0",
                 "--port",
-                "8003"
-            ]
+                "8003",
+            ],
         )
     except Exception as e:
         print(f"Ошибка при запуске приложения: {e}")
