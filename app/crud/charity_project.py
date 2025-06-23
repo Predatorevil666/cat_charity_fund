@@ -15,7 +15,7 @@ async def create_charity_project(
     new_project: CharityProjectCreate,
     session: AsyncSession,
 ) -> CharityProject:
-    new_project_data = new_project.dict()
+    new_project_data = new_project.model_dump()
     db_project = CharityProject(**new_project_data)
     session.add(db_project)
     await session.commit()
@@ -56,7 +56,7 @@ async def update_charity_project(
     session: AsyncSession,
 ) -> CharityProject:
     obj_data = jsonable_encoder(db_project)
-    update_data = project_in.dict(exclude_unset=True)
+    update_data = project_in.model_dump(exclude_unset=True)
 
     for field in obj_data:
         if field in update_data:
@@ -82,7 +82,7 @@ async def get_projects_by_completion_rate(
 ) -> List[CharityProject]:
     projects = await session.execute(
         select(CharityProject)
-        .where(CharityProject.fully_invested == True)
+        .where(CharityProject.fully_invested)
         .order_by(CharityProject.close_date - CharityProject.create_date)
     )
     return projects.scalars().all()

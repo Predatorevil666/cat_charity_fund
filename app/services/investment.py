@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List, Union
 
 from sqlalchemy import select
@@ -37,7 +37,7 @@ async def invest_money(
             obj_in.invested_amount += obj_available
             obj.invested_amount = obj.full_amount
             obj.fully_invested = True
-            obj.close_date = datetime.utcnow()
+            obj.close_date = datetime.now(timezone.utc)
             obj_in_need -= obj_available
         else:
             obj.invested_amount += obj_in_need
@@ -45,11 +45,11 @@ async def invest_money(
 
             if obj.invested_amount == obj.full_amount:
                 obj.fully_invested = True
-                obj.close_date = datetime.utcnow()
+                obj.close_date = datetime.now(timezone.utc)
 
             if obj_in.invested_amount == obj_in.full_amount:
                 obj_in.fully_invested = True
-                obj_in.close_date = datetime.utcnow()
+                obj_in.close_date = datetime.now(timezone.utc)
 
             break
 
@@ -61,7 +61,7 @@ async def invest_money(
     # Проверяем, полностью ли инвестирован объект
     if obj_in.invested_amount == obj_in.full_amount:
         obj_in.fully_invested = True
-        obj_in.close_date = datetime.utcnow()
+        obj_in.close_date = datetime.now(timezone.utc)
 
     session.add(obj_in)
     await session.commit()

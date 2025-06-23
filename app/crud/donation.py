@@ -12,7 +12,7 @@ async def create_donation(
     session: AsyncSession,
     user_id: int,
 ) -> Donation:
-    new_donation_data = new_donation.dict()
+    new_donation_data = new_donation.model_dump()
     db_donation = Donation(**new_donation_data, user_id=user_id)
     session.add(db_donation)
     await session.commit()

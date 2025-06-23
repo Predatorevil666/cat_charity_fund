@@ -50,8 +50,8 @@ def check_project_before_update(
             status_code=400, detail="Закрытый проект нельзя редактировать!"
         )
     if (
-        obj_in.full_amount
-        and obj_in.full_amount < charity_project.invested_amount
+        obj_in.full_amount and
+        obj_in.full_amount < charity_project.invested_amount
     ):
         raise HTTPException(
             status_code=400,

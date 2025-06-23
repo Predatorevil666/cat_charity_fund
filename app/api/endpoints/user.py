@@ -21,7 +21,8 @@ async def logout(user: User = Depends(current_user)):
     return {}
 
 
-# Определяем кастомный эндпоинт для удаления пользователя до подключения роутеров fastapi_users
+# Определяем кастомный эндпоинт для удаления пользователя до
+# подключения роутеров fastapi_users
 @router.delete("/users/{id}", tags=["users"], deprecated=True)
 def delete_user(id: str, user: User = Depends(current_superuser)):
     """Не используйте удаление, деактивируйте пользователей."""

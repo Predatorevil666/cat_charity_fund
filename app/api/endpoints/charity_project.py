@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List
 
 from fastapi import APIRouter, Depends
@@ -18,6 +18,7 @@ from app.crud.charity_project import (
     get_charity_projects,
     update_charity_project,
 )
+from app.models.charity_project import CharityProject
 from app.schemas.charity_project import (
     CharityProjectCreate,
     CharityProjectDB,
@@ -35,7 +36,7 @@ router = APIRouter()
 )
 async def get_all_charity_projects(
     session: AsyncSession = Depends(get_async_session),
-):
+) -> List[CharityProject]:
     return await get_charity_projects(session)
 
 
@@ -48,7 +49,7 @@ async def get_all_charity_projects(
 async def create_new_charity_project(
     charity_project: CharityProjectCreate,
     session: AsyncSession = Depends(get_async_session),
-):
+) -> CharityProject:
     await check_name_duplicate(charity_project.name, session)
     new_project = await create_charity_project(charity_project, session)
     await invest_money(new_project, session)
@@ -63,7 +64,7 @@ async def create_new_charity_project(
 async def remove_charity_project(
     project_id: int,
     session: AsyncSession = Depends(get_async_session),
-):
+) -> CharityProject:
     charity_project = await check_charity_project_exists(project_id, session)
     check_project_before_delete(charity_project)
     charity_project = await delete_charity_project(charity_project, session)
@@ -79,7 +80,7 @@ async def partially_update_charity_project(
     project_id: int,
     obj_in: CharityProjectUpdate,
     session: AsyncSession = Depends(get_async_session),
-):
+) -> CharityProject:
     charity_project = await check_charity_project_exists(project_id, session)
     check_project_before_update(charity_project, obj_in)
 
@@ -93,7 +94,7 @@ async def partially_update_charity_project(
     # Проверяем, нужно ли закрыть проект после обновления
     if charity_project.invested_amount == charity_project.full_amount:
         charity_project.fully_invested = True
-        charity_project.close_date = datetime.utcnow()
+        charity_project.close_date = datetime.now(timezone.utc)
         session.add(charity_project)
         await session.commit()
         await session.refresh(charity_project)
