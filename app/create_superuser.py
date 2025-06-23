@@ -3,12 +3,13 @@ import sys
 
 from fastapi_users.exceptions import UserAlreadyExists
 
-sys.path.append(".")
+sys.path.append(".")  # noqa: E402
 
-from app.core.config import settings
-from app.core.db import get_async_session
-from app.core.user import get_user_db, get_user_manager
-from app.schemas.user import UserCreate
+# Импорты из приложения после добавления пути
+from app.core.config import settings  # noqa: E402
+from app.core.db import get_async_session  # noqa: E402
+from app.core.user import get_user_db, get_user_manager  # noqa: E402
+from app.schemas.user import UserCreate  # noqa: E402
 
 
 # Корутина для создания суперпользователя

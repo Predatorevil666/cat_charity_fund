@@ -1,3 +1,3 @@
-from app.models.charity_project import CharityProject
-from app.models.donation import Donation
-from app.models.user import User
+from app.models.charity_project import CharityProject  # noqa
+from app.models.donation import Donation  # noqa
+from app.models.user import User  # noqa

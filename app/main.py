@@ -18,10 +18,10 @@ app.include_router(router)
 
 # Регистрируем обработчики исключений
 app.add_exception_handler(
-    RequestValidationError, 
+    RequestValidationError,
     validation_exception_handler
 )
 app.add_exception_handler(
-    InvalidPasswordException, 
+    InvalidPasswordException,
     invalid_password_exception_handler
 )
