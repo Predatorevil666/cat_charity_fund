@@ -53,4 +53,4 @@ async def invalid_password_exception_handler(
         content={
             "detail": {"code": "invalid_password", "reason": str(exc.reason)}
         },
-    ) 
+    )
