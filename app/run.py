@@ -2,7 +2,9 @@ import asyncio
 import os
 import subprocess
 import sys
+
 from pathlib import Path
+
 from fastapi_users.exceptions import UserAlreadyExists
 
 sys.path.append(".")  # noqa: E402

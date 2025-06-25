@@ -12,12 +12,8 @@ from app.api.validators import (
 )
 from app.core.db import get_async_session
 from app.core.user import current_superuser
-from app.crud.charity_project import (
-    create_charity_project,
-    delete_charity_project,
-    get_charity_projects,
-    update_charity_project,
-)
+from app.crud.charity_project import charity_project_crud
+from app.crud.donation import donation_crud
 from app.models.charity_project import CharityProject
 from app.schemas.charity_project import (
     CharityProjectCreate,
@@ -37,7 +33,7 @@ router = APIRouter()
 async def get_all_charity_projects(
     session: AsyncSession = Depends(get_async_session),
 ) -> List[CharityProject]:
-    return await get_charity_projects(session)
+    return await charity_project_crud.get_multi(session)
 
 
 @router.post(
@@ -51,8 +47,25 @@ async def create_new_charity_project(
     session: AsyncSession = Depends(get_async_session),
 ) -> CharityProject:
     await check_name_duplicate(charity_project.name, session)
-    new_project = await create_charity_project(charity_project, session)
-    await invest_money(new_project, session)
+    new_project = await charity_project_crud.create(
+        charity_project, session, commit=False
+    )
+
+    # Получаем неинвестированные пожертвования
+    donations = await donation_crud.get_not_fully_invested(session)
+
+    # Инвестируем деньги и получаем список измененных пожертвований
+    modified_donations = invest_money(new_project, donations)
+
+    # Добавляем все измененные объекты в сессию
+    for donation in modified_donations:
+        session.add(donation)
+
+    # Добавляем проект в сессию и коммитим изменения
+    session.add(new_project)
+    await session.commit()
+    await session.refresh(new_project)
+
     return new_project
 
 
@@ -67,7 +80,9 @@ async def remove_charity_project(
 ) -> CharityProject:
     charity_project = await check_charity_project_exists(project_id, session)
     check_project_before_delete(charity_project)
-    charity_project = await delete_charity_project(charity_project, session)
+    charity_project = await charity_project_crud.remove(
+        charity_project, session
+    )
     return charity_project
 
 
@@ -87,7 +102,7 @@ async def partially_update_charity_project(
     if obj_in.name is not None:
         await check_name_duplicate(obj_in.name, session)
 
-    charity_project = await update_charity_project(
+    charity_project = await charity_project_crud.update(
         charity_project, obj_in, session
     )
 

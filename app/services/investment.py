@@ -1,69 +1,79 @@
 from datetime import datetime, timezone
-from typing import List, Union
+from typing import List, TypeVar
 
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
+from app.core.constants import DEFAULT_INVESTED_AMOUNT
+from app.models.base import BaseModel
 
-from app.models.charity_project import CharityProject
-from app.models.donation import Donation
-
-
-async def get_not_fully_invested_objects(
-    obj_in: Union[CharityProject, Donation], session: AsyncSession
-) -> List[Union[CharityProject, Donation]]:
-    model = CharityProject if isinstance(obj_in, Donation) else Donation
-    objects = await session.execute(
-        select(model)
-        .where(model.fully_invested.is_(False))
-        .order_by(model.create_date)
-    )
-    return objects.scalars().all()
+ModelType = TypeVar("ModelType", bound=BaseModel)
 
 
-async def invest_money(
-    obj_in: Union[CharityProject, Donation], session: AsyncSession
-) -> Union[CharityProject, Donation]:
-    objects = await get_not_fully_invested_objects(obj_in, session)
+def invest_money(
+    target: ModelType,
+    sources: List[ModelType],
+) -> List[ModelType]:
+    """
+    Инвестирование средств.
 
-    if not objects:
-        return obj_in
+    Args:
+        target: Целевой объект для инвестирования (проект или пожертвование)
+        sources: Список объектов для инвестирования в target
 
-    obj_in_need = obj_in.full_amount - obj_in.invested_amount
+    Returns:
+        List[ModelType]: Список измененных объектов из sources
+    """
+    # Убедимся, что invested_amount инициализирован
+    if target.invested_amount is None:
+        target.invested_amount = DEFAULT_INVESTED_AMOUNT
 
-    for obj in objects:
-        obj_available = obj.full_amount - obj.invested_amount
+    # Список измененных объектов
+    modified_objects: List[ModelType] = []
 
-        if obj_in_need >= obj_available:
-            obj_in.invested_amount += obj_available
-            obj.invested_amount = obj.full_amount
-            obj.fully_invested = True
-            obj.close_date = datetime.now(timezone.utc)
-            obj_in_need -= obj_available
-        else:
-            obj.invested_amount += obj_in_need
-            obj_in.invested_amount += obj_in_need
+    # Сколько средств нужно инвестировать в target
+    target_need = target.full_amount - target.invested_amount
 
-            if obj.invested_amount == obj.full_amount:
-                obj.fully_invested = True
-                obj.close_date = datetime.now(timezone.utc)
+    # Если нечего инвестировать, возвращаем пустой список
+    if target_need <= 0:
+        return modified_objects
 
-            if obj_in.invested_amount == obj_in.full_amount:
-                obj_in.fully_invested = True
-                obj_in.close_date = datetime.now(timezone.utc)
+    # Обходим все источники средств
+    for source in sources:
+        # Убедимся, что invested_amount инициализирован в объекте
+        if source.invested_amount is None:
+            source.invested_amount = DEFAULT_INVESTED_AMOUNT
 
+        # Сколько средств доступно в текущем источнике
+        source_available = source.full_amount - source.invested_amount
+
+        # Определяем сумму для инвестирования в этой итерации
+        to_invest = min(target_need, source_available)
+
+        # Если нечего инвестировать, прерываем цикл
+        if to_invest <= 0:
             break
 
-        session.add(obj)
+        # Инвестируем средства
+        source.invested_amount += to_invest
+        target.invested_amount += to_invest
 
-        if obj_in_need <= 0:
+        # Проверяем, полностью ли инвестирован источник
+        if source.invested_amount == source.full_amount:
+            source.fully_invested = True
+            source.close_date = datetime.now(timezone.utc)
+
+        # Проверяем, полностью ли инвестирован целевой объект
+        if target.invested_amount == target.full_amount:
+            target.fully_invested = True
+            target.close_date = datetime.now(timezone.utc)
+
+        # Добавляем источник в список измененных объектов
+        modified_objects.append(source)
+
+        # Уменьшаем сумму, которую нужно инвестировать
+        target_need -= to_invest
+
+        # Если целевой объект полностью инвестирован, прерываем цикл
+        if target_need <= 0:
             break
 
-    # Проверяем, полностью ли инвестирован объект
-    if obj_in.invested_amount == obj_in.full_amount:
-        obj_in.fully_invested = True
-        obj_in.close_date = datetime.now(timezone.utc)
-
-    session.add(obj_in)
-    await session.commit()
-    await session.refresh(obj_in)
-    return obj_in
+    # Возвращаем список измененных объектов
+    return modified_objects

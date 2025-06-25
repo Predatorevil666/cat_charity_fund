@@ -15,6 +15,7 @@
 
 ## Технологии
 
+- Python 3.12
 - FastAPI
 - SQLAlchemy
 - Alembic

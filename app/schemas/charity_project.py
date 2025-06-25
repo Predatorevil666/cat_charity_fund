@@ -1,19 +1,27 @@
 from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
+
+from app.core.constants import (
+    MAX_PROJECT_NAME_LENGTH,
+    MIN_AMOUNT,
+    MIN_STRING_LENGTH,
+)
 
 
 class CharityProjectBase(BaseModel):
-    name: Optional[str] = Field(None, min_length=1, max_length=100)
-    description: Optional[str] = Field(None, min_length=1)
-    full_amount: Optional[int] = Field(None, gt=0)
+    name: Optional[str] = Field(None, max_length=MAX_PROJECT_NAME_LENGTH)
+    description: Optional[str] = Field(None)
+    full_amount: Optional[int] = Field(None, gt=MIN_AMOUNT)
+
+    model_config = ConfigDict(str_min_length=MIN_STRING_LENGTH, extra="forbid")
 
 
 class CharityProjectCreate(CharityProjectBase):
-    name: str = Field(..., min_length=1, max_length=100)
-    description: str = Field(..., min_length=1)
-    full_amount: int = Field(..., gt=0)
+    name: str = Field(..., max_length=MAX_PROJECT_NAME_LENGTH)
+    description: str = Field(...)
+    full_amount: int = Field(..., gt=MIN_AMOUNT)
 
 
 class CharityProjectUpdate(CharityProjectBase):
@@ -29,16 +37,12 @@ class CharityProjectUpdate(CharityProjectBase):
             raise ValueError("Описание проекта не может быть пустым!")
         return value
 
-    class Config:
-        extra = "forbid"
-
 
 class CharityProjectDB(CharityProjectCreate):
     id: int
     invested_amount: int
     fully_invested: bool
     create_date: datetime
-    close_date: Optional[datetime]
+    close_date: Optional[datetime] = None
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
