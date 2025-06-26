@@ -58,8 +58,7 @@ async def create_new_charity_project(
     modified_donations = invest_money(new_project, donations)
 
     # Добавляем все измененные объекты в сессию
-    for donation in modified_donations:
-        session.add(donation)
+    session.add_all(modified_donations)
 
     # Добавляем проект в сессию и коммитим изменения
     session.add(new_project)

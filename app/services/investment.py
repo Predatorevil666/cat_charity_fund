@@ -7,6 +7,18 @@ from app.models.base import BaseModel
 ModelType = TypeVar("ModelType", bound=BaseModel)
 
 
+def check_and_close_obj(obj: ModelType) -> None:
+    """
+    Проверяет, полностью ли инвестирован объект, и если да, то закрывает его.
+
+    Args:
+        obj: Объект для проверки
+    """
+    if obj.invested_amount == obj.full_amount:
+        obj.fully_invested = True
+        obj.close_date = datetime.now(timezone.utc)
+
+
 def invest_money(
     target: ModelType,
     sources: List[ModelType],
@@ -55,15 +67,9 @@ def invest_money(
         source.invested_amount += to_invest
         target.invested_amount += to_invest
 
-        # Проверяем, полностью ли инвестирован источник
-        if source.invested_amount == source.full_amount:
-            source.fully_invested = True
-            source.close_date = datetime.now(timezone.utc)
-
-        # Проверяем, полностью ли инвестирован целевой объект
-        if target.invested_amount == target.full_amount:
-            target.fully_invested = True
-            target.close_date = datetime.now(timezone.utc)
+        # Проверяем и закрываем объекты при необходимости
+        check_and_close_obj(source)
+        check_and_close_obj(target)
 
         # Добавляем источник в список измененных объектов
         modified_objects.append(source)
